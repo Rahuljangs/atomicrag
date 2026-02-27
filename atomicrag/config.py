@@ -36,6 +36,9 @@ class AtomicRAGConfig:
     # ------------------------------------------------------------------ #
     # Knowledge-Unit Extraction
     # ------------------------------------------------------------------ #
+    ku_extraction_method: str = "llm"
+    """Extraction method: ``llm`` (per-chunk LLM calls), ``vocabulary`` (global
+    vocab + sentence split, near-zero LLM cost), or ``sentence`` (pure NLP, zero cost)."""
     ku_extraction_prompt: Optional[str] = None
     """Custom prompt template for extracting atomic facts.
     Must contain ``{text_chunk}`` placeholder.  ``None`` = built-in default."""
@@ -45,6 +48,10 @@ class AtomicRAGConfig:
     """Chunks to feed per LLM call batch."""
     ku_concurrency: int = 1
     """Parallel LLM calls for KU extraction (1 = sequential)."""
+    vocab_min_term_freq: int = 2
+    """(vocabulary method) Minimum corpus frequency for a candidate term."""
+    vocab_max_terms_per_llm_call: int = 500
+    """(vocabulary method) Max terms to send per LLM filtering call."""
 
     # ------------------------------------------------------------------ #
     # Entity Extraction

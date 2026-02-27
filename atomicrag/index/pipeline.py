@@ -10,6 +10,7 @@ from atomicrag.index.chunker import TextChunker
 from atomicrag.index.entity_extractor import EntityExtractor
 from atomicrag.index.extractor import KnowledgeUnitExtractor
 from atomicrag.index.graph_builder import GraphBuilder
+from atomicrag.index.vocabulary_extractor import VocabularyExtractor
 from atomicrag.models.graph import KnowledgeGraph
 from atomicrag.models.protocols import BaseEmbedding, BaseLLM
 
@@ -50,6 +51,11 @@ class IndexPipeline:
         self.chunker = TextChunker(config=self.config)
         self.ku_extractor = KnowledgeUnitExtractor(llm=llm, config=self.config)
         self.entity_extractor = EntityExtractor(config=self.config, llm=llm)
+        self.vocab_extractor = VocabularyExtractor(
+            llm=llm, config=self.config,
+            min_term_freq=self.config.vocab_min_term_freq,
+            max_terms_per_llm_call=self.config.vocab_max_terms_per_llm_call,
+        )
         self.graph_builder = GraphBuilder(embedding=embedding, config=self.config)
 
     def run(
@@ -89,6 +95,45 @@ class IndexPipeline:
             print(f"  -> {len(all_chunks)} chunks")
         if on_progress:
             on_progress(len(all_chunks), len(all_chunks), "Chunking")
+
+        method = self.config.ku_extraction_method
+
+        # ============================================================ #
+        # VOCABULARY / SENTENCE method: single-pass extraction
+        # ============================================================ #
+        if method in ("vocabulary", "sentence"):
+            if verbose:
+                print(f"[2/3] Running '{method}' extraction pipeline...")
+
+            if method == "sentence":
+                # Pure NLP, no LLM at all
+                no_llm_extractor = VocabularyExtractor(
+                    llm=None, config=self.config,
+                    min_term_freq=self.config.vocab_min_term_freq,
+                )
+                all_kus, entities, ku_entity_map = no_llm_extractor.extract_all(all_chunks)
+            else:
+                all_kus, entities, ku_entity_map = self.vocab_extractor.extract_all(all_chunks)
+
+            if verbose:
+                print(f"  -> {len(all_kus)} KUs, {len(entities)} entities")
+            if on_progress:
+                on_progress(len(all_kus), len(all_kus), "Vocabulary Extraction")
+
+            # ---- Graph Building ----
+            if verbose:
+                print(f"[3/3] Building graph (embedding + assembly)...")
+
+            graph = self.graph_builder.build(all_chunks, all_kus, entities, ku_entity_map)
+
+            if verbose:
+                print(f"  -> Done! {graph.stats()}")
+
+            return graph
+
+        # ============================================================ #
+        # LLM method: per-chunk LLM extraction (original approach)
+        # ============================================================ #
 
         # ---- Step 2: KU Extraction ----
         concurrency = self.config.ku_concurrency
