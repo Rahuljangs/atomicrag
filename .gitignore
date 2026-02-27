@@ -11,3 +11,4 @@ build/
 venv/
 *.json
 !pyproject.toml
+.env

@@ -10,7 +10,7 @@ readme = "README.md"
 license = {text = "Apache-2.0"}
 requires-python = ">=3.10"
 authors = [
-    {name = "Rohit Jangir"},
+    {name = "Rahul Jangir"},
 ]
 keywords = ["rag", "knowledge-graph", "llm", "retrieval", "embeddings", "nlp"]
 classifiers = [
@@ -54,9 +54,9 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/rjangir/atomicrag"
-Repository = "https://github.com/rjangir/atomicrag"
-Issues = "https://github.com/rjangir/atomicrag/issues"
+Homepage = "https://github.com/Rahuljangs/atomicrag"
+Repository = "https://github.com/Rahuljangs/atomicrag"
+Issues = "https://github.com/Rahuljangs/atomicrag/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]
