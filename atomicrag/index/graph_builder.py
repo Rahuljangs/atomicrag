@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Dict, List, Optional, Tuple
 
 from atomicrag.config import AtomicRAGConfig
@@ -30,6 +31,7 @@ class GraphBuilder:
         cfg = config or AtomicRAGConfig()
         self.embedding = embedding
         self.batch_size = cfg.embedding_batch_size
+        self.concurrency = cfg.embedding_concurrency
         self.min_occurrences = cfg.min_entity_occurrences
         self.verbose = cfg.verbose
         self.on_progress = cfg.on_progress
@@ -102,19 +104,48 @@ class GraphBuilder:
         return graph
 
     def _embed_items(self, items, key, setter, stage: str = "") -> None:
-        """Batch-embed a list of items."""
+        """Batch-embed a list of items, optionally in parallel."""
         texts = [key(item) for item in items]
         total = len(texts)
 
+        # Build list of (start_index, batch_texts) tuples
+        batches = []
         for i in range(0, total, self.batch_size):
-            batch = texts[i : i + self.batch_size]
-            embeddings = self.embedding.embed_batch(batch)
+            batches.append((i, texts[i : i + self.batch_size]))
 
-            for j, emb in enumerate(embeddings):
-                setter(items[i + j], emb)
+        if self.concurrency <= 1 or len(batches) <= 1:
+            # Sequential
+            for start_idx, batch in batches:
+                embeddings = self.embedding.embed_batch(batch)
+                for j, emb in enumerate(embeddings):
+                    setter(items[start_idx + j], emb)
+                if self.on_progress:
+                    self.on_progress(min(start_idx + len(batch), total), total, stage)
+        else:
+            # Parallel embedding batches
+            if self.verbose:
+                print(f"    (parallel embedding: {len(batches)} batches, {self.concurrency} workers)")
 
-            if self.on_progress:
-                self.on_progress(min(i + len(batch), total), total, stage)
+            def _embed_batch(args):
+                start_idx, batch = args
+                return start_idx, self.embedding.embed_batch(batch)
+
+            with ThreadPoolExecutor(max_workers=self.concurrency) as executor:
+                futures = {
+                    executor.submit(_embed_batch, b_args): b_args
+                    for b_args in batches
+                }
+                completed_count = 0
+                for future in as_completed(futures):
+                    start_idx, embeddings = future.result()
+                    for j, emb in enumerate(embeddings):
+                        setter(items[start_idx + j], emb)
+                    completed_count += 1
+                    if self.on_progress:
+                        done_items = min(
+                            completed_count * self.batch_size, total
+                        )
+                        self.on_progress(done_items, total, stage)
 
     def _filter_rare_entities(
         self,

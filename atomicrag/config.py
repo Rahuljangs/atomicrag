@@ -64,6 +64,8 @@ class AtomicRAGConfig:
     # ------------------------------------------------------------------ #
     embedding_batch_size: int = 100
     """Texts to embed per batch call."""
+    embedding_concurrency: int = 1
+    """Parallel embedding batch calls (1 = sequential). Each thread processes one batch."""
     embedding_dimensions: Optional[int] = None
     """Expected embedding dimensions (``None`` = auto-detect from first call)."""
 

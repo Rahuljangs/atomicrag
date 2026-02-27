@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List, Optional, Union
 
 from atomicrag.config import AtomicRAGConfig
@@ -90,21 +91,48 @@ class IndexPipeline:
             on_progress(len(all_chunks), len(all_chunks), "Chunking")
 
         # ---- Step 2: KU Extraction ----
+        concurrency = self.config.ku_concurrency
+        total = len(all_chunks)
         if verbose:
-            print(f"[2/4] Extracting knowledge units from {len(all_chunks)} chunks...")
+            mode = "parallel" if concurrency > 1 else "sequential"
+            print(f"[2/4] Extracting knowledge units from {total} chunks ({mode}, workers={concurrency})...")
 
         all_kus = []
-        total = len(all_chunks)
-        for i, chunk in enumerate(all_chunks):
-            kus, _ = self.ku_extractor.extract(chunk)
-            all_kus.extend(kus)
 
-            if on_chunk:
-                on_chunk(i + 1, total)
-            if on_progress:
-                on_progress(i + 1, total, "KU Extraction")
-            if verbose and (i + 1) % 10 == 0:
-                print(f"  -> {i + 1}/{total} chunks, {len(all_kus)} KUs so far")
+        if concurrency <= 1:
+            for i, chunk in enumerate(all_chunks):
+                kus, _ = self.ku_extractor.extract(chunk)
+                all_kus.extend(kus)
+
+                if on_chunk:
+                    on_chunk(i + 1, total)
+                if on_progress:
+                    on_progress(i + 1, total, "KU Extraction")
+                if verbose and (i + 1) % 10 == 0:
+                    print(f"  -> {i + 1}/{total} chunks, {len(all_kus)} KUs so far")
+        else:
+            completed = 0
+            futures_map = {}
+            with ThreadPoolExecutor(max_workers=concurrency) as executor:
+                for chunk in all_chunks:
+                    future = executor.submit(self.ku_extractor.extract, chunk)
+                    futures_map[future] = chunk
+
+                for future in as_completed(futures_map):
+                    completed += 1
+                    try:
+                        kus, _ = future.result()
+                        all_kus.extend(kus)
+                    except Exception as e:
+                        chunk = futures_map[future]
+                        logger.warning(f"KU extraction failed for chunk {chunk.id[:8]}: {e}")
+
+                    if on_chunk:
+                        on_chunk(completed, total)
+                    if on_progress:
+                        on_progress(completed, total, "KU Extraction")
+                    if verbose and completed % 10 == 0:
+                        print(f"  -> {completed}/{total} chunks, {len(all_kus)} KUs so far")
 
         if verbose:
             print(f"  -> {len(all_kus)} knowledge units extracted")
