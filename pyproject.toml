@@ -1,0 +1,67 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "atomicrag"
+version = "0.1.0"
+description = "Stop retrieving chunks. Start retrieving facts. Graph-based RAG that breaks documents into atomic knowledge units, links them via an entity graph, and traverses it to answer complex queries with precision."
+readme = "README.md"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.10"
+authors = [
+    {name = "Rohit Jangir"},
+]
+keywords = ["rag", "knowledge-graph", "llm", "retrieval", "embeddings", "nlp"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+    "numpy>=1.24.0",
+]
+
+[project.optional-dependencies]
+openai = ["openai>=1.0.0"]
+gemini = ["google-generativeai>=0.5.0"]
+ollama = ["ollama>=0.1.0"]
+langchain = ["langchain-core>=0.2.0"]
+huggingface = ["sentence-transformers>=2.0.0"]
+spacy = ["spacy>=3.5.0"]
+pgvector = ["psycopg2-binary>=2.9.0", "sqlalchemy>=2.0.0"]
+all = [
+    "openai>=1.0.0",
+    "google-generativeai>=0.5.0",
+    "ollama>=0.1.0",
+    "langchain-core>=0.2.0",
+    "sentence-transformers>=2.0.0",
+    "spacy>=3.5.0",
+    "psycopg2-binary>=2.9.0",
+    "sqlalchemy>=2.0.0",
+]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "ruff>=0.1.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/rjangir/atomicrag"
+Repository = "https://github.com/rjangir/atomicrag"
+Issues = "https://github.com/rjangir/atomicrag/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["atomicrag*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
