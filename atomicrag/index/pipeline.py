@@ -1,4 +1,5 @@
 """IndexPipeline — the main entry point for building a knowledge graph."""
+
 from __future__ import annotations
 
 import logging
@@ -52,7 +53,8 @@ class IndexPipeline:
         self.ku_extractor = KnowledgeUnitExtractor(llm=llm, config=self.config)
         self.entity_extractor = EntityExtractor(config=self.config, llm=llm)
         self.vocab_extractor = VocabularyExtractor(
-            llm=llm, config=self.config,
+            llm=llm,
+            config=self.config,
             min_term_freq=self.config.vocab_min_term_freq,
             max_terms_per_llm_call=self.config.vocab_max_terms_per_llm_call,
         )
@@ -108,7 +110,8 @@ class IndexPipeline:
             if method == "sentence":
                 # Pure NLP, no LLM at all
                 no_llm_extractor = VocabularyExtractor(
-                    llm=None, config=self.config,
+                    llm=None,
+                    config=self.config,
                     min_term_freq=self.config.vocab_min_term_freq,
                 )
                 all_kus, entities, ku_entity_map = no_llm_extractor.extract_all(all_chunks)
@@ -122,7 +125,7 @@ class IndexPipeline:
 
             # ---- Graph Building ----
             if verbose:
-                print(f"[3/3] Building graph (embedding + assembly)...")
+                print("[3/3] Building graph (embedding + assembly)...")
 
             graph = self.graph_builder.build(all_chunks, all_kus, entities, ku_entity_map)
 
@@ -140,7 +143,9 @@ class IndexPipeline:
         total = len(all_chunks)
         if verbose:
             mode = "parallel" if concurrency > 1 else "sequential"
-            print(f"[2/4] Extracting knowledge units from {total} chunks ({mode}, workers={concurrency})...")
+            print(
+                f"[2/4] Extracting knowledge units from {total} chunks ({mode}, workers={concurrency})..."
+            )
 
         all_kus = []
 
@@ -195,7 +200,7 @@ class IndexPipeline:
 
         # ---- Step 4: Graph Building ----
         if verbose:
-            print(f"[4/4] Building graph (embedding + assembly)...")
+            print("[4/4] Building graph (embedding + assembly)...")
 
         graph = self.graph_builder.build(all_chunks, all_kus, entities, ku_entity_map)
 

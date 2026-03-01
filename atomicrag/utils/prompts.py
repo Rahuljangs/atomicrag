@@ -9,6 +9,7 @@ Available placeholders per prompt:
   - Entity extraction:  ``{text}``
   - Query entities:     ``{query}``
 """
+
 from __future__ import annotations
 
 import os
@@ -105,6 +106,7 @@ JSON:
 # ------------------------------------------------------------------ #
 # Helper
 # ------------------------------------------------------------------ #
+
 
 def get_prompt(
     config_value: Optional[str],

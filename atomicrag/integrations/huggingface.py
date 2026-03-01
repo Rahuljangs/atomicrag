@@ -14,6 +14,7 @@ def _import_sentence_transformers():
     """Lazily import the sentence_transformers package."""
     try:
         from sentence_transformers import SentenceTransformer
+
         return SentenceTransformer
     except ImportError as e:
         raise ImportError(

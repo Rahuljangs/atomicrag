@@ -1,4 +1,5 @@
 """Assemble a KnowledgeGraph from extracted components."""
+
 from __future__ import annotations
 
 import logging
@@ -56,9 +57,7 @@ class GraphBuilder:
         """
         # Filter rare entities
         if self.min_occurrences > 1:
-            entities, ku_entity_map = self._filter_rare_entities(
-                entities, ku_entity_map
-            )
+            entities, ku_entity_map = self._filter_rare_entities(entities, ku_entity_map)
 
         # Generate embeddings for KUs
         if self.verbose:
@@ -124,17 +123,16 @@ class GraphBuilder:
         else:
             # Parallel embedding batches
             if self.verbose:
-                print(f"    (parallel embedding: {len(batches)} batches, {self.concurrency} workers)")
+                print(
+                    f"    (parallel embedding: {len(batches)} batches, {self.concurrency} workers)"
+                )
 
             def _embed_batch(args):
                 start_idx, batch = args
                 return start_idx, self.embedding.embed_batch(batch)
 
             with ThreadPoolExecutor(max_workers=self.concurrency) as executor:
-                futures = {
-                    executor.submit(_embed_batch, b_args): b_args
-                    for b_args in batches
-                }
+                futures = {executor.submit(_embed_batch, b_args): b_args for b_args in batches}
                 completed_count = 0
                 for future in as_completed(futures):
                     start_idx, embeddings = future.result()
@@ -142,9 +140,7 @@ class GraphBuilder:
                         setter(items[start_idx + j], emb)
                     completed_count += 1
                     if self.on_progress:
-                        done_items = min(
-                            completed_count * self.batch_size, total
-                        )
+                        done_items = min(completed_count * self.batch_size, total)
                         self.on_progress(done_items, total, stage)
 
     def _filter_rare_entities(
@@ -158,15 +154,11 @@ class GraphBuilder:
             for eid in entity_ids:
                 entity_count[eid] = entity_count.get(eid, 0) + 1
 
-        keep_ids = {
-            eid for eid, count in entity_count.items()
-            if count >= self.min_occurrences
-        }
+        keep_ids = {eid for eid, count in entity_count.items() if count >= self.min_occurrences}
 
         filtered_entities = [e for e in entities if e.id in keep_ids]
         filtered_map = {
-            ku_id: [eid for eid in eids if eid in keep_ids]
-            for ku_id, eids in ku_entity_map.items()
+            ku_id: [eid for eid in eids if eid in keep_ids] for ku_id, eids in ku_entity_map.items()
         }
 
         removed = len(entities) - len(filtered_entities)

@@ -2,8 +2,10 @@
 End-to-end test of AtomicRAG with real Gemini models.
 Tests the full pipeline: Index (chunk -> extract -> embed -> graph) and Retrieve (anchor -> traverse -> rank).
 """
+
 import os
 import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from atomicrag import IndexPipeline, RetrievePipeline, AtomicRAGConfig
@@ -27,7 +29,7 @@ v3.0 represents a fundamental shift toward cloud-native infrastructure.
 The pricing model has changed from per-VM licensing to consumption-based
 billing. Enterprise customers can upgrade from v2.x with the automated
 migration tool provided in the admin console.""",
-        "doc_id": "novatech-release-notes"
+        "doc_id": "novatech-release-notes",
     },
     {
         "text": """NovaTech vs CompeteStack: Enterprise Container Platform Comparison
@@ -42,7 +44,7 @@ CI/CD pipeline integration. NovaTech's pricing starts at $0.05 per
 container-hour compared to CompeteStack's $0.08 per container-hour.
 Both platforms support hybrid cloud deployments but NovaTech's multi-region
 failover was rated "excellent" by Gartner while CompeteStack received "good".""",
-        "doc_id": "novatech-competitive"
+        "doc_id": "novatech-competitive",
     },
     {
         "text": """NovaTech Security Architecture Whitepaper
@@ -57,8 +59,8 @@ in tamper-proof storage for compliance. NovaTech achieved SOC 2 Type II
 certification in November 2025 and FedRAMP authorization is expected
 by Q2 2026. Vulnerability scanning is performed automatically on every
 container image before deployment using the integrated NovaScan engine.""",
-        "doc_id": "novatech-security"
-    }
+        "doc_id": "novatech-security",
+    },
 ]
 
 TEST_QUERIES = [
@@ -107,6 +109,7 @@ def run_test():
     print("\n--- SAVE / LOAD ---\n")
     graph.to_json("/tmp/atomicrag_test_graph.json")
     from atomicrag.models.graph import KnowledgeGraph
+
     loaded = KnowledgeGraph.from_json("/tmp/atomicrag_test_graph.json")
     assert loaded.stats() == graph.stats(), "JSON roundtrip failed"
     print("[PASS] JSON save/load roundtrip OK")

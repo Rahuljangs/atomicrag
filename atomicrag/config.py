@@ -1,4 +1,5 @@
 """Central configuration for all AtomicRAG pipelines and components."""
+
 from __future__ import annotations
 
 import json
