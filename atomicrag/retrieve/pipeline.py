@@ -1,4 +1,5 @@
 """RetrievePipeline — query a KnowledgeGraph using Q-Iter."""
+
 from __future__ import annotations
 
 import logging
@@ -44,9 +45,7 @@ class RetrievePipeline:
         self.llm = llm
         self.embedding = embedding
 
-        self.anchoring = Anchoring(
-            graph=graph, llm=llm, embedding=embedding, config=self.config
-        )
+        self.anchoring = Anchoring(graph=graph, llm=llm, embedding=embedding, config=self.config)
         self.traversal = GraphTraversal(graph=graph, config=self.config)
         self.ranker = ResultRanker(graph=graph, config=self.config)
 
@@ -65,9 +64,7 @@ class RetrievePipeline:
         if verbose:
             print(f"[1/3] Anchoring query: '{query[:60]}...'")
 
-        entity_ids, ku_ids, query_entities, query_embedding = self.anchoring.anchor(
-            query
-        )
+        entity_ids, ku_ids, query_entities, query_embedding = self.anchoring.anchor(query)
 
         if verbose:
             print(

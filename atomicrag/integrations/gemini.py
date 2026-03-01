@@ -3,6 +3,7 @@
 Supports both the new ``google-genai`` SDK and the legacy
 ``google-generativeai`` SDK. Installs with ``pip install atomicrag[gemini]``.
 """
+
 from __future__ import annotations
 
 from typing import List
@@ -13,6 +14,7 @@ def _get_genai():
     # Try new SDK first (google-genai)
     try:
         from google import genai
+
         return genai, "new"
     except ImportError:
         pass
@@ -20,6 +22,7 @@ def _get_genai():
     # Fall back to legacy SDK (google-generativeai)
     try:
         import google.generativeai as genai
+
         return genai, "legacy"
     except ImportError:
         raise ImportError(

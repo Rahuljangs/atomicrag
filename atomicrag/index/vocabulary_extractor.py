@@ -11,6 +11,7 @@ Pipeline:
 Designed for large corpora (100K+ chunks) where per-chunk LLM calls
 are too expensive.
 """
+
 from __future__ import annotations
 
 import logging
@@ -127,11 +128,10 @@ class VocabularyExtractor:
                 print(f"  -> {len(entities)} entities after LLM filtering")
         else:
             if self.verbose:
-                print("[VocabExtractor] Step 2/4: No LLM provided, keeping all candidates as entities")
-            entities = [
-                Entity(name=term, entity_type="UNKNOWN")
-                for term in candidates
-            ]
+                print(
+                    "[VocabExtractor] Step 2/4: No LLM provided, keeping all candidates as entities"
+                )
+            entities = [Entity(name=term, entity_type="UNKNOWN") for term in candidates]
 
         # Build lookup structures
         entity_by_name: Dict[str, Entity] = {}
@@ -147,7 +147,7 @@ class VocabularyExtractor:
 
         # Step 4: Match entities to KUs
         if self.verbose:
-            print(f"[VocabExtractor] Step 4/4: Matching entities to KUs...")
+            print("[VocabExtractor] Step 4/4: Matching entities to KUs...")
         ku_entity_map = self._match_entities_to_kus(kus, entity_by_name)
 
         # Count edges
@@ -161,22 +161,21 @@ class VocabularyExtractor:
     # STEP 1: Candidate Collection
     # ================================================================ #
 
-    def _collect_candidates(
-        self, chunks: List[Chunk]
-    ) -> Tuple[List[str], Counter]:
+    def _collect_candidates(self, chunks: List[Chunk]) -> Tuple[List[str], Counter]:
         """Extract candidate terms from all chunks using NLP techniques."""
         term_counter: Counter = Counter()
 
         # Use spaCy if available, otherwise fall back to regex n-grams
         try:
-            candidates = self._collect_with_spacy(chunks, term_counter)
+            self._collect_with_spacy(chunks, term_counter)
         except (ImportError, OSError):
             logger.info("spaCy not available, falling back to regex-based extraction")
-            candidates = self._collect_with_regex(chunks, term_counter)
+            self._collect_with_regex(chunks, term_counter)
 
         # Filter by minimum frequency
         filtered = [
-            term for term, count in term_counter.items()
+            term
+            for term, count in term_counter.items()
             if count >= self.min_term_freq and len(term) > 1
         ]
 
@@ -185,11 +184,10 @@ class VocabularyExtractor:
 
         return filtered, term_counter
 
-    def _collect_with_spacy(
-        self, chunks: List[Chunk], counter: Counter
-    ) -> None:
+    def _collect_with_spacy(self, chunks: List[Chunk], counter: Counter) -> None:
         """Use spaCy NER + noun chunks for candidate extraction."""
         import spacy
+
         try:
             nlp = spacy.load("en_core_web_sm")
         except OSError:
@@ -206,7 +204,7 @@ class VocabularyExtractor:
         texts = [c.content for c in chunks]
 
         for i in range(0, len(texts), batch_size):
-            batch = texts[i:i + batch_size]
+            batch = texts[i : i + batch_size]
             for doc in nlp.pipe(batch, disable=disabled, batch_size=64):
                 # NER entities
                 for ent in doc.ents:
@@ -218,48 +216,148 @@ class VocabularyExtractor:
                 for nc in doc.noun_chunks:
                     name = nc.text.strip()
                     # Remove leading determiners/articles
-                    name = re.sub(r'^(the|a|an|this|that|these|those)\s+', '', name, flags=re.IGNORECASE)
+                    name = re.sub(
+                        r"^(the|a|an|this|that|these|those)\s+", "", name, flags=re.IGNORECASE
+                    )
                     if len(name) > 2 and not name.isdigit():
                         counter[name] += 1
 
-    def _collect_with_regex(
-        self, chunks: List[Chunk], counter: Counter
-    ) -> None:
+    def _collect_with_regex(self, chunks: List[Chunk], counter: Counter) -> None:
         """Fallback: extract n-grams and capitalized phrases via regex."""
         # Common English stopwords
         stopwords = {
-            'the', 'a', 'an', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
-            'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could',
-            'should', 'may', 'might', 'can', 'shall', 'to', 'of', 'in', 'for',
-            'on', 'with', 'at', 'by', 'from', 'as', 'into', 'through', 'during',
-            'before', 'after', 'above', 'below', 'between', 'under', 'again',
-            'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why',
-            'how', 'all', 'each', 'every', 'both', 'few', 'more', 'most', 'other',
-            'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so',
-            'than', 'too', 'very', 'and', 'but', 'or', 'if', 'while', 'about',
-            'up', 'out', 'off', 'over', 'just', 'also', 'new', 'use', 'used',
-            'using', 'based', 'include', 'including', 'includes', 'it', 'its',
-            'they', 'them', 'their', 'this', 'that', 'these', 'those', 'which',
-            'what', 'who', 'whom', 'i', 'we', 'you', 'he', 'she', 'me', 'us',
+            "the",
+            "a",
+            "an",
+            "is",
+            "are",
+            "was",
+            "were",
+            "be",
+            "been",
+            "being",
+            "have",
+            "has",
+            "had",
+            "do",
+            "does",
+            "did",
+            "will",
+            "would",
+            "could",
+            "should",
+            "may",
+            "might",
+            "can",
+            "shall",
+            "to",
+            "of",
+            "in",
+            "for",
+            "on",
+            "with",
+            "at",
+            "by",
+            "from",
+            "as",
+            "into",
+            "through",
+            "during",
+            "before",
+            "after",
+            "above",
+            "below",
+            "between",
+            "under",
+            "again",
+            "further",
+            "then",
+            "once",
+            "here",
+            "there",
+            "when",
+            "where",
+            "why",
+            "how",
+            "all",
+            "each",
+            "every",
+            "both",
+            "few",
+            "more",
+            "most",
+            "other",
+            "some",
+            "such",
+            "no",
+            "nor",
+            "not",
+            "only",
+            "own",
+            "same",
+            "so",
+            "than",
+            "too",
+            "very",
+            "and",
+            "but",
+            "or",
+            "if",
+            "while",
+            "about",
+            "up",
+            "out",
+            "off",
+            "over",
+            "just",
+            "also",
+            "new",
+            "use",
+            "used",
+            "using",
+            "based",
+            "include",
+            "including",
+            "includes",
+            "it",
+            "its",
+            "they",
+            "them",
+            "their",
+            "this",
+            "that",
+            "these",
+            "those",
+            "which",
+            "what",
+            "who",
+            "whom",
+            "i",
+            "we",
+            "you",
+            "he",
+            "she",
+            "me",
+            "us",
         }
 
         for chunk in chunks:
             text = chunk.content
 
             # Extract capitalized phrases (likely proper nouns / product names)
-            caps = re.findall(r'\b[A-Z][a-zA-Z]*(?:\s+[A-Z][a-zA-Z]*)*\b', text)
+            caps = re.findall(r"\b[A-Z][a-zA-Z]*(?:\s+[A-Z][a-zA-Z]*)*\b", text)
             for phrase in caps:
                 if phrase.lower() not in stopwords and len(phrase) > 1:
                     counter[phrase] += 1
 
             # Extract n-grams
-            words = re.findall(r'\b[a-zA-Z][a-zA-Z0-9.-]*\b', text)
+            words = re.findall(r"\b[a-zA-Z][a-zA-Z0-9.-]*\b", text)
             words = [w for w in words if w.lower() not in stopwords and len(w) > 1]
 
             min_n, max_n = self.ngram_range
             for n in range(min_n, max_n + 1):
                 for j in range(len(words) - n + 1):
-                    gram = ' '.join(words[j:j + n])
+                    gram = " ".join(words[j : j + n])
                     if len(gram) > 2:
                         counter[gram] += 1
 
@@ -288,7 +386,7 @@ class VocabularyExtractor:
                 return []
 
         batches = [
-            candidates[i:i + self.max_terms_per_llm_call]
+            candidates[i : i + self.max_terms_per_llm_call]
             for i in range(0, len(candidates), self.max_terms_per_llm_call)
         ]
 
@@ -302,10 +400,12 @@ class VocabularyExtractor:
                         name_lower = item["name"].lower()
                         if name_lower not in seen_names:
                             seen_names.add(name_lower)
-                            entities.append(Entity(
-                                name=item["name"],
-                                entity_type=item.get("type", "UNKNOWN"),
-                            ))
+                            entities.append(
+                                Entity(
+                                    name=item["name"],
+                                    entity_type=item.get("type", "UNKNOWN"),
+                                )
+                            )
                     if self.verbose:
                         print(f"  Batch {i + 1}/{len(batches)}: +{len(results)} entities")
         else:
@@ -316,12 +416,16 @@ class VocabularyExtractor:
                     name_lower = item["name"].lower()
                     if name_lower not in seen_names:
                         seen_names.add(name_lower)
-                        entities.append(Entity(
-                            name=item["name"],
-                            entity_type=item.get("type", "UNKNOWN"),
-                        ))
+                        entities.append(
+                            Entity(
+                                name=item["name"],
+                                entity_type=item.get("type", "UNKNOWN"),
+                            )
+                        )
                 if self.verbose:
-                    print(f"  Batch {i + 1}/{len(batches)}: +{len(results)} entities, total={len(entities)}")
+                    print(
+                        f"  Batch {i + 1}/{len(batches)}: +{len(results)} entities, total={len(entities)}"
+                    )
 
         return entities
 
@@ -329,6 +433,7 @@ class VocabularyExtractor:
     def _parse_entity_response(response: str) -> List[dict]:
         """Parse LLM JSON response into entity dicts."""
         import json
+
         text = response.strip()
 
         # Strip markdown fences
@@ -354,10 +459,12 @@ class VocabularyExtractor:
         valid = []
         for item in items:
             if isinstance(item, dict) and "name" in item:
-                valid.append({
-                    "name": str(item["name"]).strip(),
-                    "type": str(item.get("type", "UNKNOWN")).strip(),
-                })
+                valid.append(
+                    {
+                        "name": str(item["name"]).strip(),
+                        "type": str(item.get("type", "UNKNOWN")).strip(),
+                    }
+                )
         return valid
 
     # ================================================================ #
@@ -370,6 +477,7 @@ class VocabularyExtractor:
 
         try:
             import spacy
+
             nlp = spacy.load("en_core_web_sm")
 
             # Process in batches
@@ -378,31 +486,35 @@ class VocabularyExtractor:
             chunk_ids = [c.id for c in chunks]
 
             for i in range(0, len(texts), batch_size):
-                batch_texts = texts[i:i + batch_size]
-                batch_ids = chunk_ids[i:i + batch_size]
+                batch_texts = texts[i : i + batch_size]
+                batch_ids = chunk_ids[i : i + batch_size]
 
                 for doc, cid in zip(nlp.pipe(batch_texts, batch_size=64), batch_ids):
                     for sent in doc.sents:
                         text = sent.text.strip()
                         if len(text) > 10:  # Skip very short fragments
-                            kus.append(KnowledgeUnit(
-                                content=text,
-                                chunk_id=cid,
-                                metadata={"extraction_method": "sentence_split"},
-                            ))
+                            kus.append(
+                                KnowledgeUnit(
+                                    content=text,
+                                    chunk_id=cid,
+                                    metadata={"extraction_method": "sentence_split"},
+                                )
+                            )
         except (ImportError, OSError):
             # Fallback: regex sentence splitting
             logger.info("spaCy not available, using regex sentence splitting")
             for chunk in chunks:
-                sentences = re.split(r'(?<=[.!?])\s+', chunk.content)
+                sentences = re.split(r"(?<=[.!?])\s+", chunk.content)
                 for sent in sentences:
                     text = sent.strip()
                     if len(text) > 10:
-                        kus.append(KnowledgeUnit(
-                            content=text,
-                            chunk_id=chunk.id,
-                            metadata={"extraction_method": "regex_split"},
-                        ))
+                        kus.append(
+                            KnowledgeUnit(
+                                content=text,
+                                chunk_id=chunk.id,
+                                metadata={"extraction_method": "regex_split"},
+                            )
+                        )
 
         return kus
 
@@ -439,15 +551,15 @@ class VocabularyExtractor:
         pattern_chunk_size = 2000
         compiled_patterns = []
         for i in range(0, len(patterns), pattern_chunk_size):
-            chunk = patterns[i:i + pattern_chunk_size]
-            combined = r'\b(?:' + '|'.join(chunk) + r')\b'
+            chunk = patterns[i : i + pattern_chunk_size]
+            combined = r"\b(?:" + "|".join(chunk) + r")\b"
             compiled_patterns.append(re.compile(combined, re.IGNORECASE))
 
         # Match entities to each KU
         for ku in kus:
             matched_ids: List[str] = []
             seen_entity_ids: Set[str] = set()
-            text_lower = ku.content.lower()
+            ku.content.lower()
 
             for pattern in compiled_patterns:
                 for match in pattern.finditer(ku.content):

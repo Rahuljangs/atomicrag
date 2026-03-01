@@ -1,4 +1,5 @@
 """Step 3 of Q-Iter: Rank retrieved KUs and map back to chunks."""
+
 from __future__ import annotations
 
 import logging
@@ -50,7 +51,7 @@ class ResultRanker:
         if not ku_ids:
             return RetrievalResult(query=query, entities_extracted=query_entities)
 
-        query_emb = np.array(query_embedding)
+        np.array(query_embedding)
 
         # Score each KU
         scored_kus: List[dict] = []
@@ -69,13 +70,15 @@ class ResultRanker:
                 if entity:
                     entity_names.append(entity.name)
 
-            scored_kus.append({
-                "ku_id": ku_id,
-                "content": ku.content,
-                "chunk_id": ku.chunk_id,
-                "score": score,
-                "entity_names": entity_names,
-            })
+            scored_kus.append(
+                {
+                    "ku_id": ku_id,
+                    "content": ku.content,
+                    "chunk_id": ku.chunk_id,
+                    "score": score,
+                    "entity_names": entity_names,
+                }
+            )
 
         if not scored_kus:
             return RetrievalResult(query=query, entities_extracted=query_entities)
