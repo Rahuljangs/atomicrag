@@ -1,4 +1,5 @@
 """Step 2 of Q-Iter: Iterative graph traversal with beam search."""
+
 from __future__ import annotations
 
 import logging
@@ -124,8 +125,6 @@ class GraphTraversal:
                     if norm > 0:
                         query_vec = query_vec / norm
 
-            logger.debug(
-                f"  Depth {d + 1}: added {len(new_kus)} KUs, total {len(all_kus)}"
-            )
+            logger.debug(f"  Depth {d + 1}: added {len(new_kus)} KUs, total {len(all_kus)}")
 
         return all_kus

@@ -1,4 +1,5 @@
 """Text chunking strategies for splitting documents before extraction."""
+
 from __future__ import annotations
 
 import re
@@ -54,11 +55,7 @@ class TextChunker:
         else:
             raise ValueError(f"Unknown chunking strategy: {self.strategy}")
 
-        return [
-            Chunk(content=p, doc_id=doc_id, index=i)
-            for i, p in enumerate(pieces)
-            if p.strip()
-        ]
+        return [Chunk(content=p, doc_id=doc_id, index=i) for i, p in enumerate(pieces) if p.strip()]
 
     # ------------------------------------------------------------------ #
     # Strategies
@@ -100,7 +97,7 @@ class TextChunker:
 
     def _sentence_split(self, text: str) -> List[str]:
         """Split on sentence boundaries, then merge into chunks."""
-        sentences = re.split(r'(?<=[.!?])\s+', text)
+        sentences = re.split(r"(?<=[.!?])\s+", text)
         chunks: List[str] = []
         current = ""
 
@@ -121,7 +118,7 @@ class TextChunker:
     def _fixed_split(self, text: str) -> List[str]:
         """Simple fixed-size windows with overlap."""
         step = max(1, self.chunk_size - self.chunk_overlap)
-        return [text[i:i + self.chunk_size] for i in range(0, len(text), step)]
+        return [text[i : i + self.chunk_size] for i in range(0, len(text), step)]
 
     # ------------------------------------------------------------------ #
     # Overlap
@@ -134,7 +131,7 @@ class TextChunker:
 
         result = [chunks[0]]
         for i in range(1, len(chunks)):
-            overlap_text = chunks[i - 1][-self.chunk_overlap:]
+            overlap_text = chunks[i - 1][-self.chunk_overlap :]
             result.append(overlap_text + chunks[i])
 
         return result

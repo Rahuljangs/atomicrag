@@ -14,6 +14,7 @@ def _import_openai():
     """Lazily import the openai package."""
     try:
         from openai import OpenAI
+
         return OpenAI
     except ImportError as e:
         raise ImportError(

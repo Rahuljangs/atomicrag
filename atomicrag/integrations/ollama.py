@@ -15,6 +15,7 @@ def _import_ollama():
     """Lazily import the ollama package."""
     try:
         import ollama
+
         return ollama
     except ImportError as e:
         raise ImportError(

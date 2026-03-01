@@ -3,6 +3,7 @@
 All models are plain dataclasses with built-in JSON/dict serialisation.
 They carry **no database dependency** — users decide where to store them.
 """
+
 from __future__ import annotations
 
 import json

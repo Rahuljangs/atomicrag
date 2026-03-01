@@ -21,6 +21,7 @@ Example — bring your own Embedding::
 
     pipeline = IndexPipeline(embedding=MyEmbed(), ...)
 """
+
 from __future__ import annotations
 
 from typing import List, Protocol, runtime_checkable

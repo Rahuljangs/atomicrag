@@ -2,10 +2,10 @@
 Test all 3 extraction methods: llm, vocabulary, sentence.
 Compares output quality and speed.
 """
+
 import os
 import sys
 import time
-from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -65,9 +65,9 @@ QUERY = "What are the Red Hat OpenShift Developer Services?"
 
 
 def run_method(method_name, doc_text, llm, embedding):
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"  METHOD: {method_name}")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
     config = AtomicRAGConfig(
         chunk_size=1000,
@@ -82,9 +82,9 @@ def run_method(method_name, doc_text, llm, embedding):
 
     # Index
     start = time.time()
-    graph = IndexPipeline(llm=llm, embedding=embedding, config=config).run([
-        {"text": doc_text, "doc_id": "app-mod"}
-    ])
+    graph = IndexPipeline(llm=llm, embedding=embedding, config=config).run(
+        [{"text": doc_text, "doc_id": "app-mod"}]
+    )
     index_time = time.time() - start
 
     stats = graph.stats()
@@ -97,17 +97,17 @@ def run_method(method_name, doc_text, llm, embedding):
 
     # Retrieve
     start = time.time()
-    results = RetrievePipeline(
-        graph=graph, llm=llm, embedding=embedding, config=config
-    ).search(QUERY)
+    results = RetrievePipeline(graph=graph, llm=llm, embedding=embedding, config=config).search(
+        QUERY
+    )
     retrieve_time = time.time() - start
 
-    print(f"\n  Query: \"{QUERY}\"")
+    print(f'\n  Query: "{QUERY}"')
     print(f"  Retrieve time: {retrieve_time:.1f}s")
     print(f"  Results: {len(results.items)}")
 
     for i, item in enumerate(results.items, 1):
-        content_preview = item.content.replace('\n', ' ')[:100]
+        content_preview = item.content.replace("\n", " ")[:100]
         print(f"    [{i}] score={item.score:.3f} | {content_preview}...")
 
     assert len(results.items) > 0, f"No results for method {method_name}"
@@ -145,14 +145,18 @@ def main():
     results.append(run_method("llm", doc_text, llm, embedding))
 
     # Summary
-    print(f"\n\n{'='*60}")
+    print(f"\n\n{'=' * 60}")
     print("COMPARISON SUMMARY")
-    print(f"{'='*60}")
-    print(f"{'Method':<15} {'KUs':>6} {'Entities':>10} {'Edges':>8} {'Index(s)':>10} {'TopScore':>10}")
+    print(f"{'=' * 60}")
+    print(
+        f"{'Method':<15} {'KUs':>6} {'Entities':>10} {'Edges':>8} {'Index(s)':>10} {'TopScore':>10}"
+    )
     print("-" * 60)
     for r in results:
-        print(f"{r['method']:<15} {r['kus']:>6} {r['entities']:>10} {r['edges']:>8} {r['index_time']:>9.1f}s {r['top_score']:>9.3f}")
-    print(f"{'='*60}")
+        print(
+            f"{r['method']:<15} {r['kus']:>6} {r['entities']:>10} {r['edges']:>8} {r['index_time']:>9.1f}s {r['top_score']:>9.3f}"
+        )
+    print(f"{'=' * 60}")
     print("\nALL METHODS TESTED SUCCESSFULLY")
 
 

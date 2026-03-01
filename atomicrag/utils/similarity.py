@@ -1,4 +1,5 @@
 """Vector similarity utilities (numpy-only, no external deps)."""
+
 from __future__ import annotations
 
 from typing import List

@@ -19,6 +19,7 @@ def _import_langchain_core():
     """Lazily import langchain_core."""
     try:
         import langchain_core
+
         return langchain_core
     except ImportError as e:
         raise ImportError(

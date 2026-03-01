@@ -1,4 +1,5 @@
 """Extract atomic Knowledge Units from text chunks using an LLM."""
+
 from __future__ import annotations
 
 import json
@@ -124,9 +125,11 @@ class KnowledgeUnitExtractor:
         valid = []
         for u in units:
             if isinstance(u, dict) and "content" in u:
-                valid.append({
-                    "content": str(u["content"]),
-                    "entities": [str(e) for e in u.get("entities", [])],
-                })
+                valid.append(
+                    {
+                        "content": str(u["content"]),
+                        "entities": [str(e) for e in u.get("entities", [])],
+                    }
+                )
 
         return valid

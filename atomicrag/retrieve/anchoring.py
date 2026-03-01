@@ -1,15 +1,16 @@
 """Step 1 of Q-Iter: Entity Anchoring and Semantic Anchoring."""
+
 from __future__ import annotations
 
 import json
 import logging
-from typing import Dict, List, Optional, Set, Tuple
+from typing import List, Optional, Set, Tuple
 
 from atomicrag.config import AtomicRAGConfig
 from atomicrag.models.graph import KnowledgeGraph
 from atomicrag.models.protocols import BaseEmbedding, BaseLLM
 from atomicrag.utils.prompts import DEFAULT_QUERY_ENTITY_PROMPT, get_prompt
-from atomicrag.utils.similarity import cosine_similarity, top_k_similar
+from atomicrag.utils.similarity import top_k_similar
 
 logger = logging.getLogger(__name__)
 
@@ -68,9 +69,7 @@ class Anchoring:
                 for ku_id in self.graph.kus_for_entity(entity.id):
                     entity_ku_ids.add(ku_id)
 
-        logger.info(
-            f"Entity anchoring: {len(entity_ids)} entities, {len(entity_ku_ids)} KUs"
-        )
+        logger.info(f"Entity anchoring: {len(entity_ids)} entities, {len(entity_ku_ids)} KUs")
 
         # 3. Semantic anchoring — embed query, find top-K KUs
         query_embedding = self.embedding.embed_text(query)
@@ -78,9 +77,7 @@ class Anchoring:
 
         if ku_embeddings and ku_embeddings[0]:
             top_results = top_k_similar(query_embedding, ku_embeddings, k=self.top_k)
-            semantic_ku_ids = {
-                self.graph.knowledge_units[idx].id for idx, _ in top_results
-            }
+            semantic_ku_ids = {self.graph.knowledge_units[idx].id for idx, _ in top_results}
         else:
             semantic_ku_ids = set()
 

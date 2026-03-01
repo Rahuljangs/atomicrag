@@ -1,7 +1,7 @@
 """Extract and deduplicate entities from knowledge units."""
+
 from __future__ import annotations
 
-import json
 import logging
 from typing import Dict, List, Optional, Tuple
 
@@ -38,7 +38,9 @@ class EntityExtractor:
     ):
         cfg = config or AtomicRAGConfig()
         self.method = method or cfg.entity_extraction_method
-        self.merge_similar = merge_similar if merge_similar is not None else cfg.entity_merge_similar
+        self.merge_similar = (
+            merge_similar if merge_similar is not None else cfg.entity_merge_similar
+        )
         self.entity_types = entity_types or cfg.entity_types
         self.llm = llm
 
