@@ -43,6 +43,7 @@ AtomicRAG solves this by:
 
 ## Table of Contents
 
+- [Benchmark Results](#benchmark-results)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [Extraction Methods](#extraction-methods)
@@ -58,6 +59,42 @@ AtomicRAG solves this by:
 - [Configuration Reference](#configuration-reference)
 - [License](#license)
 - [Contributing](#contributing)
+
+---
+
+## Benchmark Results
+
+Evaluated on [GraphRAG-Bench](https://graphrag-bench.github.io/) (Medical) — 2,062 questions across 4 difficulty levels from NCCN clinical guidelines.
+
+### Answer Accuracy (ACC) — GraphRAG-Bench Medical
+
+| Model | Fact Retrieval | Complex Reasoning | Ctx Summarize | Creative Gen | Avg ACC |
+|-------|:---:|:---:|:---:|:---:|:---:|
+| HippoRAG2 | 66.28 | 61.98 | 63.08 | 68.05 | 64.85 |
+| Fast-GraphRAG | 60.93 | 61.73 | 67.88 | 65.93 | 64.12 |
+| LightRAG | 63.32 | 61.32 | 63.14 | 67.91 | 63.92 |
+| RAG (w/ rerank) | 64.73 | 58.64 | 65.75 | 60.61 | 62.43 |
+| HippoRAG | 56.14 | 55.87 | 59.86 | 64.43 | 59.08 |
+| RAPTOR | 54.07 | 53.20 | 58.73 | 62.38 | 57.10 |
+| **AtomicRAG (vocab)** | **61.45** | **55.85** | **62.35** | **45.87** | **56.38** |
+| MS-GraphRAG | 38.63 | 47.04 | 41.87 | 53.11 | 45.16 |
+
+> Leaderboard scores use GPT-4o-mini as judge; AtomicRAG uses Gemini 2.5 Flash. See [detailed results](benchmark/results/README.md) for full analysis.
+
+### The Efficiency Advantage
+
+AtomicRAG's vocabulary method builds the knowledge graph with **~120-140 LLM calls total**, regardless of corpus size. Every other GraphRAG system makes **1-3 LLM calls per chunk**.
+
+| Scale | AtomicRAG (vocab) | Other GraphRAG Systems |
+|-------|:---:|:---:|
+| 1,000 chunks | ~120 calls | 1,000-3,000 calls |
+| 10,000 chunks | ~150 calls | 10,000-30,000 calls |
+| 100,000 chunks | ~500 calls | 100,000-300,000 calls |
+| 500,000 chunks (enterprise) | ~1,000 calls | 500,000-1,500,000 calls |
+
+At enterprise scale (100K+ documents), AtomicRAG achieves **competitive accuracy at <0.1% of the indexing cost** of other GraphRAG systems.
+
+See [benchmark/README.md](benchmark/README.md) for the complete analysis with cost breakdowns, retrieval metrics, and reproduction steps.
 
 ---
 
