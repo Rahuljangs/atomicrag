@@ -1,0 +1,30 @@
+{
+  "type1": {
+    "context_relevance": 0.8554189435336976,
+    "context_recall": 0.77367941712204,
+    "faithfulness": 0.9128575492777868,
+    "n_evaluated": 1098,
+    "n_ok": 940
+  },
+  "type2": {
+    "context_relevance": 0.805992141453831,
+    "context_recall": 0.6277013752455796,
+    "faithfulness": 0.8548529762762824,
+    "n_evaluated": 509,
+    "n_ok": 441
+  },
+  "type3": {
+    "context_relevance": 0.8252595155709342,
+    "context_recall": 0.46712802768166095,
+    "faithfulness": 0.8940443283950117,
+    "n_evaluated": 289,
+    "n_ok": 263
+  },
+  "type4": {
+    "context_relevance": 0.786144578313253,
+    "context_recall": 0.47560665960056214,
+    "faithfulness": 0.7429749585527616,
+    "n_evaluated": 166,
+    "n_ok": 99
+  }
+}

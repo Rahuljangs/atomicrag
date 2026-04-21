@@ -11,4 +11,10 @@ build/
 venv/
 *.json
 !pyproject.toml
+
+# Allow benchmark score/result JSONs (small files only)
+!benchmark/results/eval_scores_*.json
+!benchmark/results/eval_retrieval_scores.json
+!benchmark/results/scaling_analysis.json
+
 .env

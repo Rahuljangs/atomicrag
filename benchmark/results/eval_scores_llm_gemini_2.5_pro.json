@@ -1,0 +1,14 @@
+{
+  "type1": {
+    "answer_correctness": 0.5189698204357791
+  },
+  "type2": {
+    "answer_correctness": 0.5383452620922434
+  },
+  "type3": {
+    "answer_correctness": 0.5987205484224232
+  },
+  "type4": {
+    "answer_correctness": 0.43438348930945203
+  }
+}

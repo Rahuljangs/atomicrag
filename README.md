@@ -37,7 +37,7 @@ AtomicRAG solves this by:
 - **DB-agnostic output** -- export to JSON, dict, PostgreSQL, or any storage you want
 - **Protocol-based** -- no forced inheritance. If your class has a `generate()` method, it works.
 - **Save and reload** -- build the graph once, query it forever without re-indexing
-- **Scales to 100K+ chunks** -- vocabulary method handles large corpora at <1% of LLM cost
+- **Scales to 100K+ chunks** -- vocabulary method: 88 LLM calls for 100K documents (measured), vs 100K+ for per-chunk systems
 
 ---
 
@@ -81,18 +81,32 @@ Evaluated on [GraphRAG-Bench](https://graphrag-bench.github.io/) (Medical) — 2
 
 > Leaderboard scores use GPT-4o-mini as judge; AtomicRAG uses Gemini 2.5 Flash. See [detailed results](benchmark/results/README.md) for full analysis.
 
-### The Efficiency Advantage
+### Retrieval Quality — GraphRAG-Bench Medical
 
-AtomicRAG's vocabulary method builds the knowledge graph with **~120-140 LLM calls total**, regardless of corpus size. Every other GraphRAG system makes **1-3 LLM calls per chunk**.
+| Metric | Fact Retrieval | Complex Reasoning | Ctx Summarize | Creative Gen | Average |
+|--------|:---:|:---:|:---:|:---:|:---:|
+| Context Relevance | 85.54 | 80.60 | 82.53 | 78.61 | **81.82** |
+| Context Recall | 77.37 | 62.77 | 46.71 | 47.56 | **58.60** |
+| Faithfulness | 91.29 | 85.49 | 89.40 | 74.30 | **85.12** |
 
-| Scale | AtomicRAG (vocab) | Other GraphRAG Systems |
-|-------|:---:|:---:|
-| 1,000 chunks | ~120 calls | 1,000-3,000 calls |
-| 10,000 chunks | ~150 calls | 10,000-30,000 calls |
-| 100,000 chunks | ~500 calls | 100,000-300,000 calls |
-| 500,000 chunks (enterprise) | ~1,000 calls | 500,000-1,500,000 calls |
+> Evaluated on all 2,062 questions with Gemini 2.5 Pro as judge. See [detailed results](benchmark/results/README.md) for methodology and per-type breakdowns.
 
-At enterprise scale (100K+ documents), AtomicRAG achieves **competitive accuracy at <0.1% of the indexing cost** of other GraphRAG systems.
+### The Efficiency Advantage — Measured on Public Corpora
+
+AtomicRAG's vocabulary method builds the knowledge graph with **near-constant LLM calls** regardless of corpus size. Every other GraphRAG system makes **1-3 LLM calls per chunk**.
+
+Measured results (spaCy NER + noun chunks → frequency filter → batch divide, `max_terms_per_call=500`):
+
+| Corpus | Documents | Chunks | AtomicRAG (vocab) | Per-Chunk Systems | Reduction |
+|--------|----------:|-------:|------------------:|------------------:|----------:|
+| PubMedQA | 1,000 | 2,043 | **7 calls** | 2,043 calls | **292x** |
+| MS MARCO | 10,000 | 10,001 | **12 calls** | 10,001 calls | **833x** |
+| MS MARCO | 50,000 | 50,008 | **49 calls** | 50,008 calls | **1,020x** |
+| MS MARCO | 100,000 | 100,020 | **88 calls** | 100,020 calls | **1,137x** |
+| WikiText-103 | 10,000 | 67,796 | **226 calls** | 67,796 calls | **300x** |
+| WikiText-103 | 29,023 | 198,145 | **523 calls** | 198,145 calls | **379x** |
+
+100x more documents = only ~12x more LLM calls. At enterprise scale, AtomicRAG achieves **competitive accuracy at <0.1% of the indexing cost** of other GraphRAG systems.
 
 See [benchmark/README.md](benchmark/README.md) for the complete analysis with cost breakdowns, retrieval metrics, and reproduction steps.
 
@@ -188,8 +202,8 @@ Builds a global entity vocabulary from the entire corpus using NLP (spaCy NER + 
 config = AtomicRAGConfig(ku_extraction_method="vocabulary")
 ```
 
-- **Quality:** 93% of LLM quality (tested on real documents)
-- **Cost:** ~$0.01-0.05 for the entire corpus (1-5 LLM calls total)
+- **Quality:** ~93% of LLM quality (tested on real documents)
+- **Cost:** 7–88 LLM calls for the entire corpus (measured on 1K–100K docs)
 - **Speed:** Minutes for 100K+ chunks
 - **Best for:** Large corpora (10K-1M+ chunks)
 
@@ -449,10 +463,12 @@ Based on the Clue-RAG paper, Q-Iter improves retrieval through:
 For large corpora where per-chunk LLM calls are too expensive:
 
 1. **NLP Scan** -- Extract candidate terms from all chunks using spaCy NER + noun chunks + n-grams
-2. **Frequency Filter** -- Remove terms appearing fewer than `vocab_min_term_freq` times
-3. **LLM Filter** -- Send candidates to LLM in batches for filtering and type categorisation (1-5 total calls)
+2. **Frequency Filter** -- Remove terms appearing fewer than `vocab_min_term_freq` times (corpus-wide)
+3. **LLM Filter** -- Send candidates to LLM in batches of 500 for filtering and type categorisation (7–88 total calls for 1K–100K documents, measured on PubMedQA, MS MARCO, and WikiText-103)
 4. **Sentence Split** -- Split all chunks into sentences (one KU per sentence, no LLM)
 5. **Entity Matching** -- Fast regex-based matching of entities to KUs using compiled patterns sorted by length (longest-first to avoid substring collisions)
+
+This pipeline decouples indexing cost from corpus size. LLM calls scale with vocabulary size (bounded by natural language), not document count.
 
 ---
 

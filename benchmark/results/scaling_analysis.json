@@ -1,0 +1,88 @@
+{
+  "config": {
+    "chunk_size": 1000,
+    "chunk_overlap": 200,
+    "min_term_freq": 2,
+    "max_terms_per_llm_call": 500
+  },
+  "results": [
+    {
+      "corpus_name": "PubMedQA (biomedical abstracts)",
+      "num_documents": 1000,
+      "total_characters": 1341264,
+      "num_chunks": 2043,
+      "unique_candidates_raw": 7476,
+      "candidates_after_freq_filter": 3031,
+      "llm_calls_vocab_method": 7,
+      "llm_calls_per_chunk_method": 2043,
+      "knowledge_units": 11913,
+      "cost_reduction_factor": 291.9,
+      "analysis_time_seconds": 44.5
+    },
+    {
+      "corpus_name": "MS MARCO passages (10,000 docs)",
+      "num_documents": 10000,
+      "total_characters": 3370775,
+      "num_chunks": 10001,
+      "unique_candidates_raw": 17900,
+      "candidates_after_freq_filter": 5504,
+      "llm_calls_vocab_method": 12,
+      "llm_calls_per_chunk_method": 10001,
+      "knowledge_units": 33944,
+      "cost_reduction_factor": 833.4,
+      "analysis_time_seconds": 102.6
+    },
+    {
+      "corpus_name": "MS MARCO passages (50,000 docs)",
+      "num_documents": 50000,
+      "total_characters": 16626586,
+      "num_chunks": 50008,
+      "unique_candidates_raw": 76196,
+      "candidates_after_freq_filter": 24034,
+      "llm_calls_vocab_method": 49,
+      "llm_calls_per_chunk_method": 50008,
+      "knowledge_units": 168319,
+      "cost_reduction_factor": 1020.6,
+      "analysis_time_seconds": 508.7
+    },
+    {
+      "corpus_name": "MS MARCO passages (100,000 docs)",
+      "num_documents": 100000,
+      "total_characters": 33337836,
+      "num_chunks": 100020,
+      "unique_candidates_raw": 136295,
+      "candidates_after_freq_filter": 43887,
+      "llm_calls_vocab_method": 88,
+      "llm_calls_per_chunk_method": 100020,
+      "knowledge_units": 337607,
+      "cost_reduction_factor": 1136.6,
+      "analysis_time_seconds": 1098.0
+    },
+    {
+      "corpus_name": "WikiText-103 (10,000 articles)",
+      "num_documents": 10000,
+      "total_characters": 48438732,
+      "num_chunks": 67796,
+      "unique_candidates_raw": 230695,
+      "candidates_after_freq_filter": 112816,
+      "llm_calls_vocab_method": 226,
+      "llm_calls_per_chunk_method": 67796,
+      "knowledge_units": 487310,
+      "cost_reduction_factor": 300.0,
+      "analysis_time_seconds": 1838.7
+    },
+    {
+      "corpus_name": "WikiText-103 (29,023 articles)",
+      "num_documents": 29023,
+      "total_characters": 141577224,
+      "num_chunks": 198145,
+      "unique_candidates_raw": 513509,
+      "candidates_after_freq_filter": 261496,
+      "llm_calls_vocab_method": 523,
+      "llm_calls_per_chunk_method": 198145,
+      "knowledge_units": 1427825,
+      "cost_reduction_factor": 378.9,
+      "analysis_time_seconds": 4864.5
+    }
+  ]
+}
